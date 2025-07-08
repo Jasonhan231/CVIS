@@ -1,20 +1,25 @@
 
-const trace = {
-  x: ['2025-06-01', '2025-06-02', '2025-06-03', '2025-06-04', '2025-06-05'],
-  y: [45.1, 44.3, 43.2, 42.0, 42.8],
-  type: 'scatter',
-  mode: 'lines+markers',
-  line: { color: 'lime' },
-  name: 'DVOL'
-};
+<script>
+Plotly.d3.csv("lstm_1_forecast.csv", function(err, rows) {
+  const trace = {
+    x: rows.map(row => row.Date),
+    y: rows.map(row => parseFloat(row['h.1'])),
+    type: 'scatter',
+    mode: 'lines+markers',
+    line: { color: 'orange' },
+    name: 'LSTM Forecast'
+  };
 
-const layout = {
-  plot_bgcolor: '#111',
-  paper_bgcolor: '#111',
-  font: { color: '#fff' },
-  title: 'BTC DVOL (Volatility Index)',
-  xaxis: { title: 'Date' },
-  yaxis: { title: 'Volatility' }
-};
+  const layout = {
+    plot_bgcolor: '#111',
+    paper_bgcolor: '#111',
+    font: { color: '#fff' },
+    title: 'BTC DVOL (Volatility Index)',
+    xaxis: { title: 'Date' },
+    yaxis: { title: 'Volatility' }
+  };
 
-Plotly.newPlot('chart', [trace], layout);
+  Plotly.newPlot('chart', [trace], layout);
+});
+</script>
+
