@@ -3,16 +3,89 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>BTC Volatility Chart</title>
+  <title>Volatility Forecast Dashboard</title>
   <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
   <style>
-    body { background: #111; color: #fff; font-family: sans-serif; text-align: center; }
-    #chart { width: 90%; height: 600px; margin: auto; }
+    body {{ background: #111; color: white; font-family: sans-serif; text-align: center; }}
+    #chart {{ width: 90%; height: 600px; margin: auto; }}
+    select, input {{ margin: 10px; padding: 5px; }}
   </style>
 </head>
 <body>
-  <h1>BTC Volatility Chart</h1>
+  <h1>Volatility Forecast Dashboard</h1>
+  <label for="modelSelect">Select Model:</label>
+  <select id="modelSelect">
+    <option value="tgm_t_fore_1.csv">TGM</option>
+    <option value="egm_t_fore_1.csv">EGM</option>
+    <option value="GJR_t_fore_1.csv">GJR</option>
+    <option value="gm_t_fore_1.csv">GM</option>
+    <option value="lstm_1_forecast.csv">LSTM</option>
+    <option value="lstm_2_forecast.csv">LSTM + Sentiment</option>
+  </select>
+
+  <label for="startDate">Start Date:</label>
+  <input type="date" id="startDate">
+  <label for="endDate">End Date:</label>
+  <input type="date" id="endDate">
+  <button onclick="updatePlot()">Update</button>
+
   <div id="chart"></div>
-  <script src="data.js"></script>
+
+  <script>
+    let actualData = [], modelData = [];
+
+    function loadCSV(file, callback) {{
+      Plotly.d3.csv(file, function(err, rows) {{
+        if (err) return alert("Error loading " + file);
+        const data = rows.map(r => ({{ date: r.Date, value: parseFloat(r['h.1'] || r['IVX']) }}));
+        callback(data);
+      }});
+    }}
+
+    function filterDataByDate(data, start, end) {{
+      return data.filter(d => (!start || d.date >= start) && (!end || d.date <= end));
+    }}
+
+    function updatePlot() {{
+      const modelFile = document.getElementById("modelSelect").value;
+      const startDate = document.getElementById("startDate").value;
+      const endDate = document.getElementById("endDate").value;
+
+      loadCSV("bitvol_actual.csv", function(actual) {{
+        actualData = filterDataByDate(actual, startDate, endDate);
+
+        loadCSV(modelFile, function(model) {{
+          modelData = filterDataByDate(model, startDate, endDate);
+
+          const trace1 = {{
+            x: actualData.map(d => d.date),
+            y: actualData.map(d => d.value),
+            name: 'Actual BitVol',
+            type: 'scatter',
+            line: {{ color: 'white' }}
+          }};
+
+          const trace2 = {{
+            x: modelData.map(d => d.date),
+            y: modelData.map(d => d.value),
+            name: modelFile.replace('.csv', ''),
+            type: 'scatter'
+          }};
+
+          Plotly.newPlot('chart', [trace1, trace2], {{
+            title: 'BTC Volatility Forecast',
+            paper_bgcolor: '#111',
+            plot_bgcolor: '#111',
+            font: {{ color: '#fff' }},
+            xaxis: {{ title: 'Date' }},
+            yaxis: {{ title: 'Volatility' }}
+          }});
+        }});
+      }});
+    }}
+
+    // Initial plot
+    updatePlot();
+  </script>
 </body>
 </html>
