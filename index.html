@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <title>Volatility Forecast Dashboard</title>
   <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <script src="data.js"></script>
+  <script src="Main.js"></script>
   <style>
     body {
       background: #111;
@@ -72,7 +74,8 @@
 <body>
   <div id="left-panel">
     <h2>Volatility Forecast Dashboard</h2>
-    <input type="text" class="date-input" placeholder="From"> <input type="text" class="date-input" placeholder="To">
+  
+    <div id="modelCheckboxes"></div>
     <div id="chart"></div>
 
     <div id="customMix">
@@ -83,7 +86,7 @@
       <div class="slider-container"><span>TARCH</span><input type="range" min="0" max="100" value="15" id="TARCH"></div>
       <div class="slider-container"><span>LSTM</span><input type="range" min="0" max="100" value="5" id="LSTM"></div>
       <div class="slider-container"><span>LSTM-SENTIMENT</span><input type="range" min="0" max="100" value="35" id="LSTM_SENTIMENT"></div>
-      <button onclick="updatePlot()">Update Model</button>
+      <button onclick="updatePlot()">Generate Mix Model</button>
     </div>
   </div>
 
@@ -91,67 +94,18 @@
     <h3>Best Model Performance</h3>
     <table>
       <tr><th>Period</th><th>Model name</th><th>RMSPE</th></tr>
-      <tr><td>1 day</td><td>LSTM</td><td>0.xx</td></tr>
-      <tr><td>1 week</td><td>LSTM-Sentiment</td><td>0.xx</td></tr>
-      <tr><td>1 month</td><td>LSTM-Sentiment</td><td>0.xx</td></tr>
+      <tr><td>1 day</td><td id="best_model_1">-</td><td id="best_rmspe_1">-</td></tr>
+      <tr><td>1 week</td><td id="best_model_7">-</td><td id="best_rmspe_7">-</td></tr>
+      <tr><td>1 month</td><td id="best_model_30">-</td><td id="best_rmspe_30">-</td></tr>
     </table>
     <h3>Custom Model Performance</h3>
     <table>
       <tr><th>Period</th><th>RMSPE</th><th>Improvement</th></tr>
-      <tr><td>1 day</td><td>0.xx</td><td>- xx%</td></tr>
-      <tr><td>1 week</td><td>0.xx</td><td>Xx%</td></tr>
-      <tr><td>1 month</td><td>0.xx</td><td>Xx%</td></tr>
+      <tr><td>1 day</td><td id="custom_rmspe_1">-</td><td id="custom_improve_1">-</td></tr>
+      <tr><td>1 week</td><td id="custom_rmspe_7">-</td><td id="custom_improve_7">-</td></tr>
+      <tr><td>1 month</td><td id="custom_rmspe_30">-</td><td id="custom_improve_30">-</td></tr>
     </table>
   </div>
 
-  <script>
-    function loadCSV(file, callback) {
-      Plotly.d3.csv(file, function(err, rows) {
-        if (err) return alert("Error loading " + file);
-        const data = rows.map(r => ({
-          date: r.Date,
-          value: parseFloat(r['h.1'] || r['IVX'])
-        }));
-        callback(data);
-      });
-    }
-
-    function updatePlot() {
-      const modelFile = "egm_t_fore_1.csv";
-
-      loadCSV("bitvol_actual.csv", function(actualData) {
-        loadCSV(modelFile, function(modelData) {
-          const trace1 = {
-            x: actualData.map(d => d.date),
-            y: actualData.map(d => d.value),
-            name: "Actual BitVol",
-            type: "scatter",
-            line: { color: "white" }
-          };
-
-          const trace2 = {
-            x: modelData.map(d => d.date),
-            y: modelData.map(d => d.value),
-            name: modelFile.replace(".csv", ""),
-            type: "scatter",
-            line: { color: "orange" }
-          };
-
-          const layout = {
-            title: "Volatility Forecast",
-            paper_bgcolor: "#111",
-            plot_bgcolor: "#111",
-            font: { color: "#fff" },
-            xaxis: { title: "Date" },
-            yaxis: { title: "Volatility" }
-          };
-
-          Plotly.newPlot("chart", [trace1, trace2], layout);
-        });
-      });
-    }
-
-    updatePlot();
-  </script>
 </body>
 </html>

@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Volatility Forecast Dashboard</title>
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <style>
+    body {
+      background: #111;
+      color: white;
+      font-family: sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    #chart {
+      width: 90%;
+      height: 500px;
+      margin-top: 20px;
+    }
+    #radarChart {
+      width: 600px;
+      height: 500px;
+    }
+    .section {
+      margin-top: 20px;
+      width: 90%;
+    }
+    button {
+      padding: 10px;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h2>Volatility Forecast Dashboard with Interactive Radar</h2>
+
+  <div class="section">
+    <div id="radarChart"></div>
+    <button onclick="updatePlot()">Update Forecast from Radar</button>
+  </div>
+
+  <div class="section">
+    <div id="chart"></div>
+  </div>
+
+  <script>
+    const modelNames = ["GARCH", "EGARCH", "GJR", "TARCH", "LSTM", "LSTM_SENTIMENT"];
+    let radarValues = [0.2, 0.15, 0.15, 0.1, 0.2, 0.2];
+
+    function normalizeRadar() {
+      const total = radarValues.reduce((a, b) => a + b, 0);
+      radarValues = radarValues.map(v => v / total);
+    }
+
+    function drawRadar() {
+      normalizeRadar();
+      const trace = {
+        type: 'scatterpolar',
+        r: [...radarValues, radarValues[0]],
+        theta: [...modelNames, modelNames[0]],
+        fill: 'toself',
+        name: 'Model Weights',
+        marker: { color: 'orange' }
+      };
+
+      const layout = {
+        polar: {
+          radialaxis: {
+            visible: true,
+            range: [0, 1],
+            tickformat: '.0%'
+          }
+        },
+        paper_bgcolor: '#111',
+        plot_bgcolor: '#111',
+        font: { color: '#fff' },
+        showlegend: false
+      };
+
+      const radarChart = document.getElementById('radarChart');
+
+      Plotly.newPlot('radarChart', [trace], layout).then(gd => {
+        gd.on('plotly_click', function(data) {
+          const pointIndex = data.points[0].pointNumber;
+          const model = modelNames[pointIndex];
+          const current = radarValues[pointIndex];
+          const newVal = prompt(`Set new weight for ${model} (0-1):`, current.toFixed(2));
+
+          if (newVal !== null) {
+            const num = parseFloat(newVal);
+            if (!isNaN(num) && num >= 0 && num <= 1) {
+              radarValues[pointIndex] = num;
+              normalizeRadar();
+              drawRadar();
+              updatePlot();
+            } else {
+              alert("Please enter a valid number between 0 and 1.");
+            }
+          }
+        });
+      });
+    }
+
+    function getRadarWeights() {
+      const weights = {};
+      modelNames.forEach((name, i) => {
+        weights[name] = radarValues[i];
+      });
+      return weights;
+    }
+
+    function updatePlot() {
+      const weights = getRadarWeights();
+
+      const layout = {
+        title: "Forecast (Simulated)",
+        paper_bgcolor: "#111",
+        plot_bgcolor: "#111",
+        font: { color: "#fff" },
+        xaxis: { title: "Date" },
+        yaxis: { title: "Volatility" }
+      };
+
+      const actualTrace = {
+        x: ["2023-01-01", "2023-01-02", "2023-01-03"],
+        y: [60, 62, 61],
+        type: "scatter",
+        name: "Actual BitVol",
+        line: { color: "white" }
+      };
+
+      const customTrace = {
+        x: ["2023-01-01", "2023-01-02", "2023-01-03"],
+        y: [
+          60 * weights.GARCH + 60 * weights.EGARCH + 60 * weights.GJR +
+          60 * weights.TARCH + 60 * weights.LSTM + 60 * weights.LSTM_SENTIMENT,
+
+          62 * weights.GARCH + 62 * weights.EGARCH + 62 * weights.GJR +
+          62 * weights.TARCH + 62 * weights.LSTM + 62 * weights.LSTM_SENTIMENT,
+
+          61 * weights.GARCH + 61 * weights.EGARCH + 61 * weights.GJR +
+          61 * weights.TARCH + 61 * weights.LSTM + 61 * weights.LSTM_SENTIMENT
+        ],
+        type: "scatter",
+        name: "Custom Forecast",
+        line: { color: "orange" }
+      };
+
+      Plotly.newPlot("chart", [actualTrace, customTrace], layout);
+    }
+
+    drawRadar();
+    updatePlot();
+  </script>
+</body>
+</html>
