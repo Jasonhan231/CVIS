@@ -1,31 +1,108 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Volatility Forecast Viewer</title>
+  <title>Volatility Forecast Dashboard</title>
   <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
   <style>
-    body { background: #111; color: white; font-family: sans-serif; text-align: center; }
-    #chart { width: 90%; height: 600px; margin: auto; }
-    select, button { margin: 10px; padding: 5px; }
+    body {
+      background: #111;
+      color: white;
+      font-family: sans-serif;
+      display: flex;
+      flex-direction: row;
+      height: 100vh;
+    }
+    #left-panel {
+      width: 70%;
+      padding: 20px;
+    }
+    #chart {
+      width: 100%;
+      height: 500px;
+    }
+    #customMix {
+      margin-top: 20px;
+    }
+    .slider-container {
+      display: flex;
+      align-items: center;
+      margin: 10px 0;
+    }
+    .slider-container span {
+      width: 150px;
+      display: inline-block;
+      text-align: right;
+      margin-right: 10px;
+    }
+    #right-panel {
+      width: 30%;
+      padding: 20px;
+      background: #1e1e1e;
+      border-left: 2px solid #333;
+    }
+    table {
+      width: 100%;
+      color: white;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+    }
+    table, th, td {
+      border: 1px solid #444;
+    }
+    th, td {
+      padding: 6px 10px;
+      text-align: center;
+    }
+    th {
+      background-color: #2e2e2e;
+    }
+    input[type=range] {
+      flex: 1;
+    }
+    .date-input {
+      margin-bottom: 10px;
+      background-color: #111;
+      border: 1px solid #888;
+      color: white;
+      padding: 4px;
+    }
   </style>
 </head>
 <body>
-  <h1>Volatility Forecast Dashboard</h1>
+  <div id="left-panel">
+    <h2>Volatility Forecast Dashboard</h2>
+    <input type="text" class="date-input" placeholder="From"> <input type="text" class="date-input" placeholder="To">
+    <div id="chart"></div>
 
-  <label for="modelSelect">Select Model:</label>
-  <select id="modelSelect">
-    <option value="tgm_t_fore_1.csv">TGM</option>
-    <option value="egm_t_fore_1.csv">EGM</option>
-    <option value="GJR_t_fore_1.csv">GJR</option>
-    <option value="gm_t_fore_1.csv">GM</option>
-    <option value="lstm_1_forecast.csv">LSTM</option>
-    <option value="lstm_2_forecast.csv">LSTM + Sentiment</option>
-  </select>
-  <button onclick="updatePlot()">Update</button>
+    <div id="customMix">
+      <h3>Custom Mix</h3>
+      <div class="slider-container"><span>GARCH</span><input type="range" min="0" max="100" value="20" id="GARCH"></div>
+      <div class="slider-container"><span>EGARCH</span><input type="range" min="0" max="100" value="10" id="EGARCH"></div>
+      <div class="slider-container"><span>GJR-GARCH</span><input type="range" min="0" max="100" value="15" id="GJR"></div>
+      <div class="slider-container"><span>TARCH</span><input type="range" min="0" max="100" value="15" id="TARCH"></div>
+      <div class="slider-container"><span>LSTM</span><input type="range" min="0" max="100" value="5" id="LSTM"></div>
+      <div class="slider-container"><span>LSTM-SENTIMENT</span><input type="range" min="0" max="100" value="35" id="LSTM_SENTIMENT"></div>
+      <button onclick="updatePlot()">Update Model</button>
+    </div>
+  </div>
 
-  <div id="chart"></div>
+  <div id="right-panel">
+    <h3>Best Model Performance</h3>
+    <table>
+      <tr><th>Period</th><th>Model name</th><th>RMSPE</th></tr>
+      <tr><td>1 day</td><td>LSTM</td><td>0.xx</td></tr>
+      <tr><td>1 week</td><td>LSTM-Sentiment</td><td>0.xx</td></tr>
+      <tr><td>1 month</td><td>LSTM-Sentiment</td><td>0.xx</td></tr>
+    </table>
+    <h3>Custom Model Performance</h3>
+    <table>
+      <tr><th>Period</th><th>RMSPE</th><th>Improvement</th></tr>
+      <tr><td>1 day</td><td>0.xx</td><td>- xx%</td></tr>
+      <tr><td>1 week</td><td>0.xx</td><td>Xx%</td></tr>
+      <tr><td>1 month</td><td>0.xx</td><td>Xx%</td></tr>
+    </table>
+  </div>
 
   <script>
     function loadCSV(file, callback) {
@@ -40,7 +117,7 @@
     }
 
     function updatePlot() {
-      const modelFile = document.getElementById("modelSelect").value;
+      const modelFile = "egm_t_fore_1.csv";
 
       loadCSV("bitvol_actual.csv", function(actualData) {
         loadCSV(modelFile, function(modelData) {
@@ -56,7 +133,8 @@
             x: modelData.map(d => d.date),
             y: modelData.map(d => d.value),
             name: modelFile.replace(".csv", ""),
-            type: "scatter"
+            type: "scatter",
+            line: { color: "orange" }
           };
 
           const layout = {
@@ -73,7 +151,6 @@
       });
     }
 
-    // 自动初始化加载图表
     updatePlot();
   </script>
 </body>
