@@ -1,0 +1,21 @@
+#customMix {
+  color: white;
+  font-family: Arial, sans-serif;
+}
+
+.slider-container {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+  gap: 10px;
+}
+
+.slider-container span:first-child {
+  width: 140px;
+}
+
+input[type="range"] {
+  flex: 1;
+  margin-right: 10px;
+}
+

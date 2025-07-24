@@ -1,3 +1,7 @@
+function updateSliderValue(id) {
+  const value = document.getElementById(id).value;
+  document.getElementById(id + "_value").textContent = value + "%";
+}
 function drawMainChart() {
   const layout = {
     title: "Volatility Forecast",
@@ -65,7 +69,7 @@ function drawMainChart() {
   });
   
   });
-    // 添加模型复选框监听器
+    // monitor checkbox changes to update the chart
   document.querySelectorAll(".modelCheckbox").forEach(cb => {
     cb.addEventListener("change", () => {
       const selectedModels = Array.from(document.querySelectorAll(".modelCheckbox"))
@@ -74,7 +78,7 @@ function drawMainChart() {
 
       const newTraces = [];
 
-      // 添加 Actual 线
+      // Actual IVX
       newTraces.push({
         x: actualData.map(d => d.date),
         y: actualData.map(d => d.value),
@@ -145,11 +149,11 @@ function calculateModelPerformance(startDate) {
 
   const performance = {};
 
-  // 获取这段时间内的日期
+  
   const periodDates = {};
   for (const p of periods) {
     const dates = actualData.slice(startIndex, startIndex + p).map(d => d.date);
-    if (dates.length < p) continue; // 数据不够长
+    if (dates.length < p) continue; 
     periodDates[p] = dates;
   }
 
@@ -163,7 +167,7 @@ function calculateModelPerformance(startDate) {
         continue;
       }
 
-      // 用日期从模型数据中提取对应预测值
+      
       const predSlice = dates.map(date => {
         const found = allModelData[model].find(d => d.date === date);
         return found ? found.value : null;
@@ -174,16 +178,16 @@ function calculateModelPerformance(startDate) {
         return found ? found.value : null;
       });
 
-      // 检查是否缺失值
+      
       if (predSlice.includes(null) || actualSlice.includes(null)) {
-        console.warn(`⚠️ Skipping ${model} for period ${p} due to insufficient data`);
+        console.warn(` Skipping ${model} for period ${p} due to insufficient data`);
         performance[model][`RMSPE_${p}`] = NaN;
         continue;
       }
 
       const error = rmspe(actualSlice, predSlice);
       performance[model][`RMSPE_${p}`] = error;
-      console.log(`✅ Model: ${model}, Period: ${p}, RMSPE: ${error}`);
+      console.log(` Model: ${model}, Period: ${p}, RMSPE: ${error}`);
     }
   }
 

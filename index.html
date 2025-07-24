@@ -6,7 +6,10 @@
   <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
   <script src="data.js"></script>
   <script src="Main.js"></script>
+  <link rel="stylesheet" href="styles.css">
+
   <style>
+
     body {
       background: #111;
       color: white;
@@ -79,15 +82,47 @@
     <div id="chart"></div>
 
     <div id="customMix">
-      <h3>Custom Mix</h3>
-      <div class="slider-container"><span>GARCH</span><input type="range" min="0" max="100" value="20" id="GARCH"></div>
-      <div class="slider-container"><span>EGARCH</span><input type="range" min="0" max="100" value="10" id="EGARCH"></div>
-      <div class="slider-container"><span>GJR-GARCH</span><input type="range" min="0" max="100" value="15" id="GJR"></div>
-      <div class="slider-container"><span>TARCH</span><input type="range" min="0" max="100" value="15" id="TARCH"></div>
-      <div class="slider-container"><span>LSTM</span><input type="range" min="0" max="100" value="5" id="LSTM"></div>
-      <div class="slider-container"><span>LSTM-SENTIMENT</span><input type="range" min="0" max="100" value="35" id="LSTM_SENTIMENT"></div>
-      <button onclick="updatePlot()">Generate Mix Model</button>
-    </div>
+  <h3>Custom Mix</h3>
+
+  <div class="slider-container">
+    <span>GARCH</span>
+    <input type="range" min="0" max="100" value="20" id="GARCH" oninput="updateSliderValue('GARCH')">
+    <span id="GARCH_value">20%</span>
+  </div>
+
+  <div class="slider-container">
+    <span>EGARCH</span>
+    <input type="range" min="0" max="100" value="10" id="EGARCH" oninput="updateSliderValue('EGARCH')">
+    <span id="EGARCH_value">10%</span>
+  </div>
+
+  <div class="slider-container">
+    <span>GJR-GARCH</span>
+    <input type="range" min="0" max="100" value="15" id="GJR" oninput="updateSliderValue('GJR')">
+    <span id="GJR_value">15%</span>
+  </div>
+
+  <div class="slider-container">
+    <span>TARCH</span>
+    <input type="range" min="0" max="100" value="15" id="TARCH" oninput="updateSliderValue('TARCH')">
+    <span id="TARCH_value">15%</span>
+  </div>
+
+  <div class="slider-container">
+    <span>LSTM</span>
+    <input type="range" min="0" max="100" value="5" id="LSTM" oninput="updateSliderValue('LSTM')">
+    <span id="LSTM_value">5%</span>
+  </div>
+
+  <div class="slider-container">
+    <span>LSTM-SENTIMENT</span>
+    <input type="range" min="0" max="100" value="35" id="LSTM_SENTIMENT" oninput="updateSliderValue('LSTM_SENTIMENT')">
+    <span id="LSTM_SENTIMENT_value">35%</span>
+  </div>
+
+  <button onclick="updatePlot()">Generate Mix Model</button>
+</div>
+
   </div>
 
   <div id="right-panel">
